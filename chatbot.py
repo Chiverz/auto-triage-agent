@@ -27,12 +27,14 @@ def summarise_conversation(one_pager, messages):
         summary += f"**{section}**\n\n{content}\n\n"
 
     summary += "---\n\n### 💬 Follow-up Questions & Answers\n"
-    for i in range(len(messages)):
-        msg = messages[i]
-        if msg["role"] == "user":
-            q = messages[i - 1]["content"] if i > 0 else "N/A"
-            a = msg["content"]
-            summary += f"**Q:** {q}\n\n**A:** {a}\n\n"
+    current_question = None
+    for msg in messages:
+        if msg["role"] == "assistant":
+            current_question = msg["content"]
+        elif msg["role"] == "user":
+            q = current_question or "N/A"
+            summary += f"**Q:** {q}\n\n**A:** {msg['content']}\n\n"
+            current_question = None
 
     return summary
 
