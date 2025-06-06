@@ -2,7 +2,9 @@ import asyncio
 from agents import Agent, Runner
 
 # Initialize the agent
-agent = Agent(name="Assistant", instructions="""You are an expert business analyst working in the telecoms industry and the business stakeholder has provided you with the 1 pager business demand. 
+agent = Agent(
+    name="Assistant", 
+    instructions="""You are an expert business analyst working in the telecoms industry and the business stakeholder has provided you with the 1 pager business demand. 
               
 Provide what you believe to be the highest priority follow up question you would ask the business stakeholder, asking only a single question until you have no further questions and give the why?
 
@@ -37,12 +39,22 @@ def summarise_conversation(one_pager, messages):
     return summary
 
 # New function to handle business requirements generation
-generation_agent = Agent(name="RequirementsBot", instructions="""
-As an expert business analyst, turn this business 1 pager and Q & A into a set of business requirements. Be structured and clear. Use bullet points or numbered lists where appropriate.
-""")
+generation_agent = Agent(
+    name="RequirementsBot", 
+    instructions="""As an expert business analyst, turn this business 1 pager and Q & A into a set of business requirements. Be structured and clear. Use bullet points or numbered lists where appropriate."""
+)
 
 async def generate_business_requirements(prompt, one_pager, messages):
     """Use a dedicated agent to generate business requirements from inputs."""
+    full_context = one_pager + messages + [{"role": "user", "content": prompt}]
+    conversation = "\n".join(
+        f"{'User' if msg['role'] == 'user' else 'Assistant'}: {msg['content']}"
+        for msg in full_context
+    )
+    return await Runner.run(generation_agent, conversation)
+
+async def generate_ado_epics_and_features(prompt, one_pager, messages):
+    """Use the business requirements to define a suitable set of epics and features for delivery via the SDLC."""
     full_context = one_pager + messages + [{"role": "user", "content": prompt}]
     conversation = "\n".join(
         f"{'User' if msg['role'] == 'user' else 'Assistant'}: {msg['content']}"

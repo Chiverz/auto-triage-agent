@@ -1,6 +1,6 @@
 import streamlit as st
 import asyncio
-from chatbot import chat_with_agent, summarise_conversation, generate_business_requirements
+from chatbot import chat_with_agent, summarise_conversation, generate_business_requirements, generate_ado_epics_and_features
 
 # Simple password protection
 PASSWORD = st.secrets["APP_PASSWORD"]
@@ -59,6 +59,16 @@ def show_summary():
             messages=st.session_state.messages
         ))
         st.markdown(requirements)
+        
+    st.markdown("---")
+    st.subheader("Generated ADO Epics and Features")
+    with st.spinner("Generating ADO work items..."):
+        ado_output = asyncio.run(generate_ado_epics_and_features(
+            prompt="Use the business requirements to define a suitable set of epics and features for delivery via the SDLC.",
+            business_requirements=st.session_state.business_requirements
+        ))
+        st.markdown(ado_output)
+
 
 # Define the initial form to collect user inputs
 def show_initial_form():
